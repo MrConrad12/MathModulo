@@ -23,6 +23,12 @@ from tkinter import *
 from math import *
 from graph import Graph
 from control import Command
-import matplotlib.pyplot as plt 
-import numpy as np
 
+root = Tk()
+root.update()
+root.title('Modulo Math')
+graph = Graph(root, width=600, height=640, bg='black')
+graph.pack(side=RIGHT, fill=BOTH, padx=10, pady=10)
+com = Command(root, graph=graph, width=1000, height=640)
+com.pack(side=RIGHT, expand=Y, fill=BOTH, padx=10, pady=10)
+root.mainloop()

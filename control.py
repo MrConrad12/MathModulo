@@ -88,3 +88,92 @@ class Control(LabelFrame):
         self.modulo = int(modulo)
         self.event_generate('<Control-Z>')
 
+
+class Auto(LabelFrame):
+    """configuration for automatic animation"""
+    def __init__(self, *args, graph=None, **kwargs):
+        super().__init__(*args,**kwargs)
+        self.configure(text='Auto config')
+        self.running = False
+        self._graph = graph
+        self._modulo = 2
+        self._multi = 2
+        self._speed = 1
+        self._input_modulo = Input(self, text='modulo')
+        self._input_multi = Input(self, text='multi')
+        
+        self._multi_ind = 1
+        self._modulo_ind = 1
+
+        frame = Frame(self, width=40)
+        Label(frame, text='Speed', width=10).pack(side=LEFT)
+        self.speed_spin = Spinbox(frame, from_=1, to=7)
+        self.speed_spin.pack(side=LEFT, expand=NO)
+        frame.pack(side=TOP, expand=YES, padx=5, pady=5)
+
+        Button(frame, text='STOP', width=10, command=self.stop).pack(side=RIGHT, expand=YES, padx=3)
+        Button(frame, text='RUN', width=10, command=self.run).pack(side=RIGHT, expand=YES, padx=3)
+        
+
+    def run(self):
+        """run animation"""
+        self._multi_ind = 1
+        self._modulo_ind = 1
+        self._modulo = self._input_modulo.value
+        self._multi = self._input_multi.value
+        self._speed = int(self.speed_spin.get())
+        self.running = True
+        self.event_generate('<Control-A>')
+
+    def stop(self):
+        """stop animation"""
+        self.running = False
+        self.event_generate('<Control-A>')
+
+
+class Command(Frame):
+    """command for automatic and manual configuration"""
+    def __init__(self, *args, graph = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.configure(relief=GROOVE, bd=4)
+        self.graph = graph
+        self.choice = IntVar()
+
+        self.radio1 = Radiobutton(self, text='activate', variable=self.choice, value=1)
+        self.radio2 = Radiobutton(self, text='activate', variable=self.choice, value=0)
+        self.auto = Auto(self,graph=graph)
+        self.control = Control(self)
+
+        self.radio1.pack(side=TOP)
+        self.auto.pack(fill=X)
+        self.radio2.pack(side=TOP)
+        self.control.pack(fill=X)
+
+        self.master.bind('<Control-A>', self.animation)
+        self.master.bind('<Control-Z>', self.draw)
+
+    def draw(self, event):
+        """draw lines in the canvas"""
+        self.auto.running = False       
+        self.graph.show_modulo(
+            multi = self.control.multi + 1,
+            modulo = self.control.modulo + 1
+        )
+
+    def animation(self, event=None):
+        if self.auto.running:
+            self.graph.show_modulo(
+                multi = self.auto._multi_ind,
+                modulo = self.auto._modulo_ind
+            )
+            if self.auto._multi_ind <= self.auto._multi:
+                self.auto._multi_ind += 0.1
+            if self.auto._modulo_ind <= self.auto._modulo:
+                self.auto._modulo_ind += 1
+            if not(
+                self.auto._multi_ind == self.auto._multi and 
+                self.auto._modulo_ind == self.auto._modulo):
+                self.after(int(500/self.auto._speed), self.animation)
+            else: 
+                self.auto.running = False
+                self.graph.delete(ALL)
