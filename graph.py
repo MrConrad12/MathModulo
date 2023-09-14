@@ -61,3 +61,25 @@ class Graph(Canvas):
             outline= 'black'
             )
 
+if __name__ == '__main__':
+    root = Tk()
+    root.update()
+    test = Graph(root, width=500, height=700, bg='black')
+    test.pack()
+    i = 1
+    a = 10
+    timer = 0
+    def add():
+        global i, a, timer
+        test.show_modulo(multi=i, modulo=a)
+        
+        timer += 0.05
+        # in dual incrementation stop at modulo 175 and multi 17.5
+        if a <= 300 :
+            
+            i += 0.1
+            a += 0
+            root.after(60, add)
+        
+    add()
+    root.mainloop()
